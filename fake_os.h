@@ -12,7 +12,7 @@ typedef struct {
 struct FakeOS;
 typedef void (*ScheduleFn)(struct FakeOS* os, void* args);
 
-typedef struct FakeOS{
+typedef struct FakeOS{ //io aggiungerei in questa struct n puntatori a fakepcb con n il numero di core, forse un array di fakepcb se prendo il numero core come parametro
   FakePCB* running;
   ListHead ready;
   ListHead waiting;

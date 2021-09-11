@@ -57,6 +57,7 @@ int main(int argc, char** argv) {
     }
   }
   printf("num processes in queue %d\n", os.processes.size);
+  // qua forse sarà os.running.first, oppure un os.running1 .. os.runningN
   while(os.running
         || os.ready.first
         || os.waiting.first

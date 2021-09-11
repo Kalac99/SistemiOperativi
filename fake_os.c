@@ -6,6 +6,7 @@
 
 void FakeOS_init(FakeOS* os) {
   os->running=0;
+  //forse list init di &os->running(?) ma passargli la size da parametro oppure settarla fissa con un os->running->size = n
   List_init(&os->ready);
   List_init(&os->waiting);
   List_init(&os->processes);
@@ -18,8 +19,9 @@ void FakeOS_createProcess(FakeOS* os, FakeProcess* p) {
   assert(p->arrival_time==os->timer && "time mismatch in creation");
   // we check that in the list of PCBs there is no
   // pcb having the same pid
+  // se implemento la linked list mi conviene fare l'aux per vedere i pcb di ogni core
   assert( (!os->running || os->running->pid!=p->pid) && "pid taken");
-
+  //controlla che il pid non sia nella ready e nella wait
   ListItem* aux=os->ready.first;
   while(aux){
     FakePCB* pcb=(FakePCB*)aux;
@@ -44,6 +46,7 @@ void FakeOS_createProcess(FakeOS* os, FakeProcess* p) {
 
   // depending on the type of the first event
   // we put the process either in ready or in waiting
+  //dovrebbe rimanere invariata nel multicore
   ProcessEvent* e=(ProcessEvent*)new_pcb->events.first;
   switch(e->type){
   case CPU:
@@ -125,6 +128,9 @@ void FakeOS_simStep(FakeOS* os){
   // if event over, destroy event
   // and reschedule process
   // if last event, destroy running
+
+  //qua probabilmente aux=os->running.first e poi il while, altrimenti un blocco tipo il seguente per ogni core
+
   FakePCB* running=os->running;
   printf("\trunning pid: %d\n", running?running->pid:-1);
   if (running) {
@@ -172,5 +178,6 @@ void FakeOS_simStep(FakeOS* os){
 
 }
 
+//non implementata?
 void FakeOS_destroy(FakeOS* os) {
 }

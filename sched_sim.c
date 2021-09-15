@@ -5,6 +5,8 @@
 
 FakeOS os;
 
+
+
 typedef struct {
   int quantum;
 } SchedRRArgs;
@@ -18,7 +20,6 @@ void schedRR(FakeOS* os, void* args_){
     return;
 
   FakePCB* pcb=(FakePCB*) List_popFront(&os->ready);
-  //os->running=pcb;
   //Se c'è spazio nei core inserisco in running il pcb appena preso dai ready
   /*if (List_isFull(&os->running)==0){
     List_pushBack(&os->running,(ListItem*)pcb);
@@ -26,9 +27,9 @@ void schedRR(FakeOS* os, void* args_){
   else return;*/
 
   if(os->running1 == 0){os->running1=pcb;}
-  else if(os->running2 == 0){os->running2=pcb;}
-  else if(os->running3 == 0){os->running3=pcb;}
-  else if(os->running4 == 0){os->running4=pcb;}
+  else if(nuclei>=2 && os->running2 == 0){os->running2=pcb;}
+  else if(nuclei>=3 && os->running3 == 0){os->running3=pcb;}
+  else if(nuclei>=4 && os->running4 == 0){os->running4=pcb;}
   else return;
   
   assert(pcb->events.first);
@@ -51,6 +52,12 @@ void schedRR(FakeOS* os, void* args_){
 
 int main(int argc, char** argv) {
 
+  //Prendo il numero di parametri...massimo 4 per ora
+
+  while(nuclei<1 || nuclei >4){
+  printf("Inserisci il numero di core voluti, minimo 1 massimo 4: ");
+  scanf("%d",&nuclei);
+  }
   
 
   FakeOS_init(&os);

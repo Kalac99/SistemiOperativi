@@ -2,6 +2,7 @@
 #include "linked_list.h"
 #pragma once
 
+int nuclei;
 
 typedef struct {
   ListItem list;
@@ -11,17 +12,6 @@ typedef struct {
 
 struct FakeOS;
 typedef void (*ScheduleFn)(struct FakeOS* os, void* args);
-
-/*typedef struct FakeOS{ //io aggiungerei na bella linked list di fakepcb con size il numero di core oppure  runningI con i = 1..N numero di core 
-  FakePCB* running;
-  ListHead ready;
-  ListHead waiting;
-  int timer;
-  ScheduleFn schedule_fn;
-  void* schedule_args;
-
-  ListHead processes;
-} FakeOS;*/
 
 //WORK IN PROGRESS
 /*typedef struct FakeOS{

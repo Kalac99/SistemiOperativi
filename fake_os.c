@@ -56,9 +56,9 @@ void FakeOS_createProcess(FakeOS* os, FakeProcess* p) {
 
   
   assert( (!os->running1 || os->running1->pid!=p->pid) && "pid taken");
-  assert( (!os->running2 || os->running2->pid!=p->pid) && "pid taken");
-  assert( (!os->running3 || os->running3->pid!=p->pid) && "pid taken");
-  assert( (!os->running4 || os->running4->pid!=p->pid) && "pid taken");
+  //assert( (!os->running2 || os->running2->pid!=p->pid) && "pid taken");
+  //assert( (!os->running3 || os->running3->pid!=p->pid) && "pid taken");
+  //assert( (!os->running4 || os->running4->pid!=p->pid) && "pid taken");
   
   //controlla che il pid non sia nella ready e nella wait
   aux=os->ready.first;
@@ -241,7 +241,7 @@ void FakeOS_simStep(FakeOS* os){
         os->running1 = 0;  
       }
     }
-    running=os->running2;  
+    /*running=os->running2;  
     printf("\trunning pid on core 2: %d\n", running?running->pid:-1);
     if (running) {
       ProcessEvent* e=(ProcessEvent*) running->events.first;
@@ -328,9 +328,9 @@ void FakeOS_simStep(FakeOS* os){
             break;
           }
         }
-        os->running4 = 0; //CREATA ALT 
+        os->running4 = 0;  
       }
-    }
+    }*/
 
     
 
@@ -346,12 +346,18 @@ void FakeOS_simStep(FakeOS* os){
     (*os->schedule_fn)(os, os->schedule_args); 
   }
   */
-  if (os->schedule_fn && ! os->running1){ //CREATA ALT
+  if (os->schedule_fn && ! os->running1){ 
     (*os->schedule_fn)(os, os->schedule_args); 
   }
-  if (os->schedule_fn && ! os->running2){ //CREATA ALT
+  /*if (os->schedule_fn && ! os->running2){ 
     (*os->schedule_fn)(os, os->schedule_args); 
   }
+  if (os->schedule_fn && ! os->running3){ 
+    (*os->schedule_fn)(os, os->schedule_args); 
+  }
+  if (os->schedule_fn && ! os->running4){ 
+    (*os->schedule_fn)(os, os->schedule_args); 
+  }*/
 
   // if running not defined and ready queue not empty
   // put the first in ready to run
@@ -363,8 +369,12 @@ void FakeOS_simStep(FakeOS* os){
 
   if (! os->running1 && os->ready.first) {
     os->running1=(FakePCB*) List_popFront(&os->ready);}
-    if (! os->running2 && os->ready.first) {
+  /*if (! os->running2 && os->ready.first) {
     os->running2=(FakePCB*) List_popFront(&os->ready);}
+  if (! os->running3 && os->ready.first) {
+    os->running1=(FakePCB*) List_popFront(&os->ready);}
+  if (! os->running4 && os->ready.first) {
+    os->running2=(FakePCB*) List_popFront(&os->ready);}*/
   
   ++os->timer;
 

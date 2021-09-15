@@ -4,7 +4,7 @@
 
 #include "fake_os.h"
 
-void FakeOS_init(FakeOS* os) {
+/*void FakeOS_init(FakeOS* os) {
   os->running=0;  //CREATA ALT
   //forse list init di &os->running(?) ma passargli la size da parametro oppure settarla fissa con un os->running->size = n
   List_init(&os->ready);
@@ -12,12 +12,12 @@ void FakeOS_init(FakeOS* os) {
   List_init(&os->processes);
   os->timer=0;
   os->schedule_fn=0;
-}
+}*/
 
 //WORK IN PROGRESS
 /*void FakeOS_init(FakeOS* os) {
   List_init(&os->running);
-  os->running->maxsize = 4 //SETTO IL NUMERO DI CORE, DA RIVEDERE COME PASSARGLI QUESTO VALORE
+  os->running.maxsize = 4; //SETTO IL NUMERO DI CORE, DA RIVEDERE COME PASSARGLI QUESTO VALORE
   List_init(&os->ready);
   List_init(&os->waiting);
   List_init(&os->processes);
@@ -25,23 +25,43 @@ void FakeOS_init(FakeOS* os) {
   os->schedule_fn=0;
 }*/
 
+void FakeOS_init(FakeOS* os) {
+  os->running1=0;
+  os->running2=0;
+  os->running3=0;
+  os->running4=0;
+  List_init(&os->ready);
+  List_init(&os->waiting);
+  List_init(&os->processes);
+  os->timer=0;
+  os->schedule_fn=0;
+}
+
 void FakeOS_createProcess(FakeOS* os, FakeProcess* p) {
   // sanity check
   assert(p->arrival_time==os->timer && "time mismatch in creation");
   // we check that in the list of PCBs there is no
   // pcb having the same pid
   // se implemento la linked list mi conviene fare l'aux per vedere i pcb di ogni core
+  ListItem* aux;
   //WORK IN PROGRESS
-  /*ListItem* aux=os->running->first;
+  /*aux=os->running.first;
   while(aux){
     FakePCB* pcb=(FakePCB*)aux;
     assert(pcb->pid!=p->pid && "pid taken");
     aux=aux->next;
   }*/
 
-  assert( (!os->running || os->running->pid!=p->pid) && "pid taken"); //CREATA ALT
+  //assert( (!os->running || os->running->pid!=p->pid) && "pid taken"); //CREATA ALT
+
+  
+  assert( (!os->running1 || os->running1->pid!=p->pid) && "pid taken");
+  assert( (!os->running2 || os->running2->pid!=p->pid) && "pid taken");
+  assert( (!os->running3 || os->running3->pid!=p->pid) && "pid taken");
+  assert( (!os->running4 || os->running4->pid!=p->pid) && "pid taken");
+  
   //controlla che il pid non sia nella ready e nella wait
-  ListItem* aux=os->ready.first;
+  aux=os->ready.first;
   while(aux){
     FakePCB* pcb=(FakePCB*)aux;
     assert(pcb->pid!=p->pid && "pid taken");
@@ -150,11 +170,12 @@ void FakeOS_simStep(FakeOS* os){
 
   //qua probabilmente aux=os->running.first e poi il while, altrimenti un blocco tipo il seguente per ogni core
 
-  //aux=os->running->first;
-  //while(aux){
+  /*aux=os->running.first;
+  while(aux){
     
-    //FakePCB* running=aux;
-    FakePCB* running=os->running;   //CREATA ALT
+    FakePCB* running = (FakePCB*) aux;
+    aux=aux->next;
+    //FakePCB* running=os->running;   //CREATA ALT
     printf("\trunning pid: %d\n", running?running->pid:-1);
     if (running) {
       ProcessEvent* e=(ProcessEvent*) running->events.first;
@@ -181,29 +202,170 @@ void FakeOS_simStep(FakeOS* os){
             break;
           }
         }
-        os->running = 0; //CREATA ALT
+        //os->running = 0; //CREATA ALT
         //questa detach dovrebbe eliminare il pcb del processo che ha terminato la sua durata (burst o quanto?)
-        //List_detach(os->running,aux);
+        List_detach(&os->running,(ListItem*)running);
+        
       }
     }
-  //}  
+  }*/
+
+    
+    FakePCB* running=os->running1;  
+    printf("\trunning pid on core 1: %d\n", running?running->pid:-1);
+    if (running) {
+      ProcessEvent* e=(ProcessEvent*) running->events.first;
+      assert(e->type==CPU);
+      e->duration--;
+      printf("\t\tremaining time:%d\n",e->duration);
+      if (e->duration==0){
+        printf("\t\tend burst\n");
+        List_popFront(&running->events);
+        free(e);
+        if (! running->events.first) {
+          printf("\t\tend process\n");
+          free(running); // kill process
+        } else {
+          e=(ProcessEvent*) running->events.first;
+          switch (e->type){
+          case CPU:
+            printf("\t\tmove to ready\n");
+            List_pushBack(&os->ready, (ListItem*) running);
+            break;
+          case IO:
+            printf("\t\tmove to waiting\n");
+            List_pushBack(&os->waiting, (ListItem*) running);
+            break;
+          }
+        }
+        os->running1 = 0;  
+      }
+    }
+    running=os->running2;  
+    printf("\trunning pid on core 2: %d\n", running?running->pid:-1);
+    if (running) {
+      ProcessEvent* e=(ProcessEvent*) running->events.first;
+      assert(e->type==CPU);
+      e->duration--;
+      printf("\t\tremaining time:%d\n",e->duration);
+      if (e->duration==0){
+        printf("\t\tend burst\n");
+        List_popFront(&running->events);
+        free(e);
+        if (! running->events.first) {
+          printf("\t\tend process\n");
+          free(running); // kill process
+        } else {
+          e=(ProcessEvent*) running->events.first;
+          switch (e->type){
+          case CPU:
+            printf("\t\tmove to ready\n");
+            List_pushBack(&os->ready, (ListItem*) running);
+            break;
+          case IO:
+            printf("\t\tmove to waiting\n");
+            List_pushBack(&os->waiting, (ListItem*) running);
+            break;
+          }
+        }
+        os->running2 = 0; 
+      }
+    }
+    running=os->running3;  
+    printf("\trunning pid on core 3: %d\n", running?running->pid:-1);
+    if (running) {
+      ProcessEvent* e=(ProcessEvent*) running->events.first;
+      assert(e->type==CPU);
+      e->duration--;
+      printf("\t\tremaining time:%d\n",e->duration);
+      if (e->duration==0){
+        printf("\t\tend burst\n");
+        List_popFront(&running->events);
+        free(e);
+        if (! running->events.first) {
+          printf("\t\tend process\n");
+          free(running); // kill process
+        } else {
+          e=(ProcessEvent*) running->events.first;
+          switch (e->type){
+          case CPU:
+            printf("\t\tmove to ready\n");
+            List_pushBack(&os->ready, (ListItem*) running);
+            break;
+          case IO:
+            printf("\t\tmove to waiting\n");
+            List_pushBack(&os->waiting, (ListItem*) running);
+            break;
+          }
+        }
+        os->running3 = 0;  
+      }
+    }
+    running=os->running4;  
+    printf("\trunning pid on core 4: %d\n", running?running->pid:-1);
+    if (running) {
+      ProcessEvent* e=(ProcessEvent*) running->events.first;
+      assert(e->type==CPU);
+      e->duration--;
+      printf("\t\tremaining time:%d\n",e->duration);
+      if (e->duration==0){
+        printf("\t\tend burst\n");
+        List_popFront(&running->events);
+        free(e);
+        if (! running->events.first) {
+          printf("\t\tend process\n");
+          free(running); // kill process
+        } else {
+          e=(ProcessEvent*) running->events.first;
+          switch (e->type){
+          case CPU:
+            printf("\t\tmove to ready\n");
+            List_pushBack(&os->ready, (ListItem*) running);
+            break;
+          case IO:
+            printf("\t\tmove to waiting\n");
+            List_pushBack(&os->waiting, (ListItem*) running);
+            break;
+          }
+        }
+        os->running4 = 0; //CREATA ALT 
+      }
+    }
+
+    
 
 
   // call schedule, if defined
   // Controllo che ci sia almeno un core libero verificando che la lista dei running sia piena, se piena allora tutti i core sono occupati -> SKIP
   //if (os->schedule_fn && ! List_isFull(os->running))
-  if (os->schedule_fn && ! os->running){ //CREATA ALT
+  /*if (os->schedule_fn && ! os->running){ //CREATA ALT
+    (*os->schedule_fn)(os, os->schedule_args); 
+  }*/
+  /*
+   while (os->schedule_fn && (List_isFull(&os->running)==0)){ 
+    (*os->schedule_fn)(os, os->schedule_args); 
+  }
+  */
+  if (os->schedule_fn && ! os->running1){ //CREATA ALT
+    (*os->schedule_fn)(os, os->schedule_args); 
+  }
+  if (os->schedule_fn && ! os->running2){ //CREATA ALT
     (*os->schedule_fn)(os, os->schedule_args); 
   }
 
   // if running not defined and ready queue not empty
   // put the first in ready to run
-  //if (os->ready.first && ! List_isFull(os->running))
-  if (! os->running && os->ready.first) {
-    os->running=(FakePCB*) List_popFront(&os->ready);
-    //List_pushBack(os->running,(FakePCB*) List_popFront(&os->ready));
-  }
+  /*while (os->ready.first && (List_isFull(&os->running)==0)) {
+  //if (! os->running && os->ready.first) {
+    //os->running=(FakePCB*) List_popFront(&os->ready);
+    List_pushBack(&os->running, List_popFront(&os->ready));
+  }*/
 
+  if (! os->running1 && os->ready.first) {
+    os->running1=(FakePCB*) List_popFront(&os->ready);}
+    if (! os->running2 && os->ready.first) {
+    os->running2=(FakePCB*) List_popFront(&os->ready);}
+  
   ++os->timer;
 
 }

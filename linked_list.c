@@ -5,7 +5,7 @@ void List_init(ListHead* head) {
   head->first=0;
   head->last=0;
   head->size=0;
-  head->maxsize=0; // in teoria campo utile solo per i running del fakeOS
+  //head->maxsize=0; // in teoria campo utile solo per i running del fakeOS
 }
 
 ListItem* List_find(ListHead* head, ListItem* item) {
@@ -93,7 +93,7 @@ ListItem* List_popFront(ListHead* head) {
 
 //Funzione per controllare se una lista (nel nostro caso la lista dei running) è piena
 int List_isFull(ListHead* head){
-  if(head->maxsize > head->size) 0;
-  else 1;
+  if(head->maxsize > head->size) return 0;
+  else return 1;
 }
 

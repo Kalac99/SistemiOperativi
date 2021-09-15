@@ -18,7 +18,16 @@ void schedRR(FakeOS* os, void* args_){
     return;
 
   FakePCB* pcb=(FakePCB*) List_popFront(&os->ready);
-  os->running=pcb;
+  //os->running=pcb;
+  //Se c'è spazio nei core inserisco in running il pcb appena preso dai ready
+  /*if (List_isFull(&os->running)==0){
+    List_pushBack(&os->running,(ListItem*)pcb);
+  }
+  else return;*/
+
+  if(os->running1 == 0){os->running1=pcb;}
+  else if(os->running2 == 0){os->running2=pcb;}
+  else return;
   
   assert(pcb->events.first);
   ProcessEvent* e = (ProcessEvent*)pcb->events.first;
@@ -64,7 +73,9 @@ int main(int argc, char** argv) {
   }
   printf("num processes in queue %d\n", os.processes.size);
   // qua forse sarà os.running.first, oppure un os.running1 .. os.runningN
-  while(os.running
+  // OCCHIO qua c'era os.running
+  //Nella mia prima versione è os.running.first
+  while(os.running1 || os.running2
         || os.ready.first
         || os.waiting.first
         || os.processes.first){

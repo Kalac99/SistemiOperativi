@@ -12,7 +12,7 @@ typedef struct {
 struct FakeOS;
 typedef void (*ScheduleFn)(struct FakeOS* os, void* args);
 
-typedef struct FakeOS{ //io aggiungerei na bella linked list di fakepcb con size il numero di core oppure  runningI con i = 1..N numero di core 
+/*typedef struct FakeOS{ //io aggiungerei na bella linked list di fakepcb con size il numero di core oppure  runningI con i = 1..N numero di core 
   FakePCB* running;
   ListHead ready;
   ListHead waiting;
@@ -21,7 +21,7 @@ typedef struct FakeOS{ //io aggiungerei na bella linked list di fakepcb con size
   void* schedule_args;
 
   ListHead processes;
-} FakeOS;
+} FakeOS;*/
 
 //WORK IN PROGRESS
 /*typedef struct FakeOS{
@@ -32,7 +32,21 @@ typedef struct FakeOS{ //io aggiungerei na bella linked list di fakepcb con size
   ScheduleFn schedule_fn;
   void* schedule_args;
   ListHead processes;
-} FakeOS;*/
+} FakeOS;
+*/
+typedef struct FakeOS{ 
+  FakePCB* running1;
+  FakePCB* running2;
+  FakePCB* running3;
+  FakePCB* running4;
+  ListHead ready;
+  ListHead waiting;
+  int timer;
+  ScheduleFn schedule_fn;
+  void* schedule_args;
+
+  ListHead processes;
+} FakeOS;
 
 void FakeOS_init(FakeOS* os);
 void FakeOS_simStep(FakeOS* os);

@@ -30,6 +30,8 @@ void schedRR(FakeOS* os, void* args_){
   else if(nuclei>=2 && os->running2 == 0){os->running2=pcb;}
   else if(nuclei>=3 && os->running3 == 0){os->running3=pcb;}
   else if(nuclei>=4 && os->running4 == 0){os->running4=pcb;}
+  else if(nuclei>=5 && os->running5 == 0){os->running5=pcb;}
+  else if(nuclei>=6 && os->running6 == 0){os->running6=pcb;}
   else return;
   
   assert(pcb->events.first);
@@ -54,9 +56,10 @@ int main(int argc, char** argv) {
 
   //Prendo il numero di parametri...massimo 4 per ora
 
-  while(nuclei<1 || nuclei >4){
-  printf("Inserisci il numero di core voluti, minimo 1 massimo 4: ");
-  scanf("%d",&nuclei);
+  while(nuclei<1 || nuclei >6){
+    printf("Inserisci il numero di core voluti, minimo 1 massimo 6: ");
+    scanf("%d",&nuclei);
+    if(nuclei==0) printf("Sul serio? Che ci fai con una CPU inutile?\n");
   }
   
 
@@ -84,7 +87,7 @@ int main(int argc, char** argv) {
   // qua forse sarà os.running.first, oppure un os.running1 .. os.runningN
   // OCCHIO qua c'era os.running
   //Nella mia prima versione è os.running.first
-  while(os.running1 || os.running2 || os.running3 || os.running4
+  while(os.running1 || os.running2 || os.running3 || os.running4 || os.running5 || os.running6
         || os.ready.first
         || os.waiting.first
         || os.processes.first){

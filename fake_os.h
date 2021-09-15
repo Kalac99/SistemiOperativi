@@ -29,6 +29,8 @@ typedef struct FakeOS{
   FakePCB* running2;
   FakePCB* running3;
   FakePCB* running4;
+  FakePCB* running5;
+  FakePCB* running6;
   ListHead ready;
   ListHead waiting;
   int timer;

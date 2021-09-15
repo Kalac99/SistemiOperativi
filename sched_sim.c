@@ -26,9 +26,9 @@ void schedRR(FakeOS* os, void* args_){
   else return;*/
 
   if(os->running1 == 0){os->running1=pcb;}
-  /*else if(os->running2 == 0){os->running2=pcb;}
+  else if(os->running2 == 0){os->running2=pcb;}
   else if(os->running3 == 0){os->running3=pcb;}
-  else if(os->running4 == 0){os->running4=pcb;}*/
+  else if(os->running4 == 0){os->running4=pcb;}
   else return;
   
   assert(pcb->events.first);
@@ -77,10 +77,11 @@ int main(int argc, char** argv) {
   // qua forse sarà os.running.first, oppure un os.running1 .. os.runningN
   // OCCHIO qua c'era os.running
   //Nella mia prima versione è os.running.first
-  while(os.running1 //|| os.running2 || os.running3 || os.running4
+  while(os.running1 || os.running2 || os.running3 || os.running4
         || os.ready.first
         || os.waiting.first
         || os.processes.first){
     FakeOS_simStep(&os);
   }
+  printf(" ALL PROCESSES ENDED THEIR WORK ..... BYE BYE\n");
 }

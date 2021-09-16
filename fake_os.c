@@ -5,7 +5,7 @@
 #include "fake_os.h"
 
 //WORK IN PROGRESS
-/*void FakeOS_init(FakeOS* os) {
+void FakeOS_init(FakeOS* os) {
   List_init(&os->running);
   os->running.maxsize = 4; //SETTO IL NUMERO DI CORE, DA RIVEDERE COME PASSARGLI QUESTO VALORE
   List_init(&os->ready);
@@ -13,9 +13,9 @@
   List_init(&os->processes);
   os->timer=0;
   os->schedule_fn=0;
-}*/
+}
 
-void FakeOS_init(FakeOS* os) {
+/*void FakeOS_init(FakeOS* os) {
   os->running1=0;
   os->running2=0;
   os->running3=0;
@@ -27,7 +27,7 @@ void FakeOS_init(FakeOS* os) {
   List_init(&os->processes);
   os->timer=0;
   os->schedule_fn=0;
-}
+}*/
 
 void FakeOS_createProcess(FakeOS* os, FakeProcess* p) {
   // sanity check
@@ -37,19 +37,19 @@ void FakeOS_createProcess(FakeOS* os, FakeProcess* p) {
   // se implemento la linked list mi conviene fare l'aux per vedere i pcb di ogni core
   ListItem* aux;
   //WORK IN PROGRESS
-  /*aux=os->running.first;
+  aux=os->running.first;
   while(aux){
     FakePCB* pcb=(FakePCB*)aux;
     assert(pcb->pid!=p->pid && "pid taken");
     aux=aux->next;
-  }*/
+  }
 
-  assert( (!os->running1 || os->running1->pid!=p->pid) && "pid taken");
+  /*assert( (!os->running1 || os->running1->pid!=p->pid) && "pid taken");
   if (nuclei>=2) {assert( (!os->running2 || os->running2->pid!=p->pid) && "pid taken");
   if (nuclei>=3) {assert( (!os->running3 || os->running3->pid!=p->pid) && "pid taken");
   if (nuclei>=4) {assert( (!os->running4 || os->running4->pid!=p->pid) && "pid taken");
   if (nuclei>=5) {assert( (!os->running5 || os->running5->pid!=p->pid) && "pid taken");
-  if (nuclei>=5) {assert( (!os->running6 || os->running6->pid!=p->pid) && "pid taken");}}}}}
+  if (nuclei>=5) {assert( (!os->running6 || os->running6->pid!=p->pid) && "pid taken");}}}}}*/
   
   //controlla che il pid non sia nella ready e nella wait
   aux=os->ready.first;
@@ -116,6 +116,8 @@ void FakeOS_simStep(FakeOS* os){
     }
   }
 
+  
+
   // scan waiting list, and put in ready all items whose event terminates
   aux=os->waiting.first;
   while(aux) {
@@ -160,13 +162,16 @@ void FakeOS_simStep(FakeOS* os){
   // if last event, destroy running
 
   //qua probabilmente aux=os->running.first e poi il while, altrimenti un blocco tipo il seguente per ogni core
-
-  /*aux=os->running.first;
-  while(aux){
-    
+  
+  
+  aux=os->running.first;
+  //-------------------------------PROBLEMA PRINCIPALE!-------------------------------------------------------------------
+  int  i =  0;
+  while(i<os->running.size){
     FakePCB* running = (FakePCB*) aux;
-    aux=aux->next;
-    printf("\trunning pid: %d\n", running?running->pid:-1);
+    if(aux) aux=aux->next;
+    printf("\trunning pid on core %d: %d\n", i+1,running?running->pid:-1);
+    i++;
     if (running) {
       ProcessEvent* e=(ProcessEvent*) running->events.first;
       assert(e->type==CPU);
@@ -196,11 +201,14 @@ void FakeOS_simStep(FakeOS* os){
         //questa detach dovrebbe eliminare il pcb del processo che ha terminato la sua durata (burst o quanto?)
         List_detach(&os->running,(ListItem*)running);
         
+        
       }
+      
     }
-  }*/
+  }
+  
 
-    
+   /* 
     FakePCB* running=os->running1;  
     printf("\trunning pid on core 1: %d\n", running?running->pid:-1);
     if (running) {
@@ -393,7 +401,7 @@ void FakeOS_simStep(FakeOS* os){
         }
       }
     }
-  }
+  }*/
 
     
 
@@ -401,11 +409,15 @@ void FakeOS_simStep(FakeOS* os){
   // call schedule, if defined
   // Controllo che ci sia almeno un core libero verificando che la lista dei running sia piena, se piena allora tutti i core sono occupati -> SKIP
   //if (os->schedule_fn && ! List_isFull(os->running))
-  /*
-   while (os->schedule_fn && (List_isFull(&os->running)==0)){ 
+  
+  //CICLA QUA DENTRO-- non più I guess -- ora dovrei avert risolto con os->ready.first che mi faceva ciclare
+   while(os->schedule_fn && (List_isFull(&os->running)==0) && os->ready.first){ 
     (*os->schedule_fn)(os, os->schedule_args); 
   }
-  */
+
+  
+  
+ /*
   if (os->schedule_fn && ! os->running1){ 
     (*os->schedule_fn)(os, os->schedule_args); 
   }
@@ -423,14 +435,17 @@ void FakeOS_simStep(FakeOS* os){
   }
   if (nuclei>=6 && os->schedule_fn && ! os->running6){ 
     (*os->schedule_fn)(os, os->schedule_args); 
-  }
+  }*/
 
   // if running not defined and ready queue not empty
   // put the first in ready to run
-  /*while (os->ready.first && (List_isFull(&os->running)==0)) {
-    List_pushBack(&os->running, List_popFront(&os->ready));
-  }*/
 
+  
+  while (os->ready.first && (List_isFull(&os->running)==0)) {
+    List_pushBack(&os->running, List_popFront(&os->ready));
+  }
+  
+/*
   if (! os->running1 && os->ready.first) {
     os->running1=(FakePCB*) List_popFront(&os->ready);}
   if (nuclei>=2 && ! os->running2 && os->ready.first) {
@@ -443,7 +458,7 @@ void FakeOS_simStep(FakeOS* os){
     os->running5=(FakePCB*) List_popFront(&os->ready);}
   if (nuclei>=6 && ! os->running6 && os->ready.first) {
     os->running6=(FakePCB*) List_popFront(&os->ready);}    
-  
+  */
   ++os->timer;
 
 }

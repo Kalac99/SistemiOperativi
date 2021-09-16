@@ -14,7 +14,7 @@ struct FakeOS;
 typedef void (*ScheduleFn)(struct FakeOS* os, void* args);
 
 //WORK IN PROGRESS
-/*typedef struct FakeOS{
+typedef struct FakeOS{
   ListHead running;
   ListHead ready;
   ListHead waiting;
@@ -22,9 +22,10 @@ typedef void (*ScheduleFn)(struct FakeOS* os, void* args);
   ScheduleFn schedule_fn;
   void* schedule_args;
   ListHead processes;
+  int maxsize;
 } FakeOS;
-*/
-typedef struct FakeOS{ 
+
+/*typedef struct FakeOS{ 
   FakePCB* running1;
   FakePCB* running2;
   FakePCB* running3;
@@ -38,7 +39,7 @@ typedef struct FakeOS{
   void* schedule_args;
 
   ListHead processes;
-} FakeOS;
+} FakeOS;*/
 
 void FakeOS_init(FakeOS* os);
 void FakeOS_simStep(FakeOS* os);

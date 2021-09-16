@@ -13,26 +13,26 @@ typedef struct {
 
 void schedRR(FakeOS* os, void* args_){
   SchedRRArgs* args=(SchedRRArgs*)args_;
-
+  
   // look for the first process in ready
   // if none, return
-  if (! os->ready.first)
+  if (!os->ready.first)
     return;
 
   FakePCB* pcb=(FakePCB*) List_popFront(&os->ready);
   //Se c'è spazio nei core inserisco in running il pcb appena preso dai ready
-  /*if (List_isFull(&os->running)==0){
-    List_pushBack(&os->running,(ListItem*)pcb);
+  if (List_isFull(&os->running)==0){
+    List_pushBack(&os->running,(ListItem*)pcb);  
   }
-  else return;*/
+  else return;
 
-  if(os->running1 == 0){os->running1=pcb;}
+  /*if(os->running1 == 0){os->running1=pcb;}
   else if(nuclei>=2 && os->running2 == 0){os->running2=pcb;}
   else if(nuclei>=3 && os->running3 == 0){os->running3=pcb;}
   else if(nuclei>=4 && os->running4 == 0){os->running4=pcb;}
   else if(nuclei>=5 && os->running5 == 0){os->running5=pcb;}
   else if(nuclei>=6 && os->running6 == 0){os->running6=pcb;}
-  else return;
+  else return;*/
   
   assert(pcb->events.first);
   ProcessEvent* e = (ProcessEvent*)pcb->events.first;
@@ -50,17 +50,19 @@ void schedRR(FakeOS* os, void* args_){
     e->duration-=args->quantum;
     List_pushFront(&pcb->events, (ListItem*)qe);
   }
+  
+  
 };
 
 int main(int argc, char** argv) {
 
   //Prendo il numero di parametri...massimo 4 per ora
-
+/*
   while(nuclei<1 || nuclei >6){
     printf("Inserisci il numero di core voluti, minimo 1 massimo 6: ");
     scanf("%d",&nuclei);
     if(nuclei==0) printf("Sul serio? Che ci fai con una CPU inutile?\n");
-  }
+  }*/
   
 
   FakeOS_init(&os);
@@ -69,9 +71,6 @@ int main(int argc, char** argv) {
   os.schedule_args=&srr_args;
   os.schedule_fn=schedRR;
 
-  
-  
-  
   for (int i=1; i<argc; ++i){
     FakeProcess new_process;
     int num_events=FakeProcess_load(&new_process, argv[i]);
@@ -87,7 +86,7 @@ int main(int argc, char** argv) {
   // qua forse sarà os.running.first, oppure un os.running1 .. os.runningN
   // OCCHIO qua c'era os.running
   //Nella mia prima versione è os.running.first
-  while(os.running1 || os.running2 || os.running3 || os.running4 || os.running5 || os.running6
+  while(os.running.first //os.running1 || os.running2 || os.running3 || os.running4 || os.running5 || os.running6
         || os.ready.first
         || os.waiting.first
         || os.processes.first){

@@ -20,6 +20,7 @@ void schedRR(FakeOS* os, void* args_){
     return;
 
   FakePCB* pcb=(FakePCB*) List_popFront(&os->ready);
+  printf("\nPID DELL'ESTRATTO DALLA READY %d\n",pcb->pid);
   //Se c'è spazio nei core inserisco in running il pcb appena preso dai ready
   if (List_isFull(&os->running)==0){
     List_pushBack(&os->running,(ListItem*)pcb);  

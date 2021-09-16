@@ -7,7 +7,7 @@
 //WORK IN PROGRESS
 void FakeOS_init(FakeOS* os) {
   List_init(&os->running);
-  os->running.maxsize = 4; //SETTO IL NUMERO DI CORE, DA RIVEDERE COME PASSARGLI QUESTO VALORE
+  os->running.maxsize = 4; //SETTO IL NUMERO DI CORE, DA RIVEDERE COME PASSARGLI QUESTO VALORE -< tramite variabile globale che prendo da scanf
   List_init(&os->ready);
   List_init(&os->waiting);
   List_init(&os->processes);
@@ -167,9 +167,11 @@ void FakeOS_simStep(FakeOS* os){
   aux=os->running.first;
   //-------------------------------PROBLEMA PRINCIPALE!-------------------------------------------------------------------
   int  i =  0;
-  while(i<os->running.size){
+  int dimensione = os->running.size;
+  while(i<dimensione){
     FakePCB* running = (FakePCB*) aux;
-    if(aux) aux=aux->next;
+    printf("\n PID del processo preso dal running: %d \n ", running->pid);
+    aux=aux->next;
     printf("\trunning pid on core %d: %d\n", i+1,running?running->pid:-1);
     i++;
     if (running) {
@@ -187,6 +189,8 @@ void FakeOS_simStep(FakeOS* os){
         } else {
           e=(ProcessEvent*) running->events.first;
           switch (e->type){
+            //PROBLEMA----VIENE PUSHATO SOLO L'ULTIMO PROCESSO NELLA READY ipotizzo avvenga lo stesso nella waiting - GLI ALTRI PROCESSI SONO SPARITI 
+            // quindi penso che in qualche modo ogni push vada a "sovrascrivere il precedente"
           case CPU:
             printf("\t\tmove to ready\n");
             List_pushBack(&os->ready, (ListItem*) running);
@@ -200,8 +204,6 @@ void FakeOS_simStep(FakeOS* os){
         //os->running = 0; //CREATA ALT
         //questa detach dovrebbe eliminare il pcb del processo che ha terminato la sua durata (burst o quanto?)
         List_detach(&os->running,(ListItem*)running);
-        
-        
       }
       
     }
@@ -403,6 +405,13 @@ void FakeOS_simStep(FakeOS* os){
     }
   }*/
 
+  aux = os->ready.first;
+  while(aux){
+    FakePCB* pcb = (FakePCB*) aux;
+    printf("\nPID DELLA READY: %d\n",pcb->pid);
+    aux = aux->next;
+  }
+
     
 
 
@@ -411,7 +420,9 @@ void FakeOS_simStep(FakeOS* os){
   //if (os->schedule_fn && ! List_isFull(os->running))
   
   //CICLA QUA DENTRO-- non più I guess -- ora dovrei avert risolto con os->ready.first che mi faceva ciclare
-   while(os->schedule_fn && (List_isFull(&os->running)==0) && os->ready.first){ 
+  
+  while(os->schedule_fn && (List_isFull(&os->running)==0) && os->ready.first){    
+    printf("\nDEBUGGO\n");
     (*os->schedule_fn)(os, os->schedule_args); 
   }
 

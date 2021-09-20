@@ -80,7 +80,8 @@ ListItem* List_detach(ListHead* head, ListItem* item) {
 }
 
 ListItem* List_pushBack(ListHead* head, ListItem* item) {
-  return List_insert(head, head->last, item);
+  if (head->size==0) return List_pushFront(head,item); 
+  else return List_insert(head, head->last, item);
 };
 
 ListItem* List_pushFront(ListHead* head, ListItem* item) {

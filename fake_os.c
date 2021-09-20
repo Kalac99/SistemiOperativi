@@ -7,7 +7,7 @@
 //WORK IN PROGRESS
 void FakeOS_init(FakeOS* os) {
   List_init(&os->running);
-  os->running.maxsize = 4; //SETTO IL NUMERO DI CORE, DA RIVEDERE COME PASSARGLI QUESTO VALORE -< tramite variabile globale che prendo da scanf
+  os->running.maxsize = nuclei; //SETTO IL NUMERO DI CORE, DA RIVEDERE COME PASSARGLI QUESTO VALORE -< tramite variabile globale che prendo da scanf
   List_init(&os->ready);
   List_init(&os->waiting);
   List_init(&os->processes);
@@ -168,11 +168,11 @@ void FakeOS_simStep(FakeOS* os){
   //-------------------------------PROBLEMA PRINCIPALE!-------------------------------------------------------------------
   int  i =  0;
   int dimensione = os->running.size;
-  while(i<dimensione){
+  while(aux){
     FakePCB* running = (FakePCB*) aux;
-    printf("\n PID del processo preso dal running: %d \n ", running->pid);
+    //printf("\n PID del processo preso dal running: %d \n ", running->pid);
     aux=aux->next;
-    printf("\trunning pid on core %d: %d\n", i+1,running?running->pid:-1);
+    printf("\trunning pid on core : %d\n",running?running->pid:-1);
     i++;
     if (running) {
       ProcessEvent* e=(ProcessEvent*) running->events.first;
@@ -183,6 +183,7 @@ void FakeOS_simStep(FakeOS* os){
         printf("\t\tend burst\n");
         List_popFront(&running->events);
         free(e);
+        List_detach(&os->running, (ListItem*)running);
         if (! running->events.first) {
           printf("\t\tend process\n");
           free(running); // kill process
@@ -190,10 +191,11 @@ void FakeOS_simStep(FakeOS* os){
           e=(ProcessEvent*) running->events.first;
           switch (e->type){
             //PROBLEMA----VIENE PUSHATO SOLO L'ULTIMO PROCESSO NELLA READY ipotizzo avvenga lo stesso nella waiting - GLI ALTRI PROCESSI SONO SPARITI 
-            // quindi penso che in qualche modo ogni push vada a "sovrascrivere il precedente"
+            // quindi penso che in qualche modo ogni push vada a "sovrascrivere" il precedente
           case CPU:
             printf("\t\tmove to ready\n");
-            List_pushBack(&os->ready, (ListItem*) running);
+            List_pushBack(&os->ready, (ListItem*)running);
+            
             break;
           case IO:
             printf("\t\tmove to waiting\n");
@@ -203,11 +205,15 @@ void FakeOS_simStep(FakeOS* os){
         }
         //os->running = 0; //CREATA ALT
         //questa detach dovrebbe eliminare il pcb del processo che ha terminato la sua durata (burst o quanto?)
-        List_detach(&os->running,(ListItem*)running);
       }
+      
       
     }
   }
+  
+  /*aux = os->ready.first;
+  FakePCB* ao = (FakePCB*) aux;
+  printf("PRIMO DELLA READY %d",ao->pid);*/
   
 
    /* 
@@ -405,12 +411,7 @@ void FakeOS_simStep(FakeOS* os){
     }
   }*/
 
-  aux = os->ready.first;
-  while(aux){
-    FakePCB* pcb = (FakePCB*) aux;
-    printf("\nPID DELLA READY: %d\n",pcb->pid);
-    aux = aux->next;
-  }
+  
 
     
 
@@ -422,7 +423,7 @@ void FakeOS_simStep(FakeOS* os){
   //CICLA QUA DENTRO-- non più I guess -- ora dovrei avert risolto con os->ready.first che mi faceva ciclare
   
   while(os->schedule_fn && (List_isFull(&os->running)==0) && os->ready.first){    
-    printf("\nDEBUGGO\n");
+    //printf("\nDEBUGGO\n");
     (*os->schedule_fn)(os, os->schedule_args); 
   }
 

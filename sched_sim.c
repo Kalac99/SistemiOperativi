@@ -20,7 +20,7 @@ void schedRR(FakeOS* os, void* args_){
     return;
 
   FakePCB* pcb=(FakePCB*) List_popFront(&os->ready);
-  printf("\nPID DELL'ESTRATTO DALLA READY %d\n",pcb->pid);
+  
   //Se c'è spazio nei core inserisco in running il pcb appena preso dai ready
   if (List_isFull(&os->running)==0){
     List_pushBack(&os->running,(ListItem*)pcb);  
@@ -58,12 +58,12 @@ void schedRR(FakeOS* os, void* args_){
 int main(int argc, char** argv) {
 
   //Prendo il numero di parametri...massimo 4 per ora
-/*
+
   while(nuclei<1 || nuclei >6){
     printf("Inserisci il numero di core voluti, minimo 1 massimo 6: ");
     scanf("%d",&nuclei);
     if(nuclei==0) printf("Sul serio? Che ci fai con una CPU inutile?\n");
-  }*/
+  }
   
 
   FakeOS_init(&os);

@@ -189,6 +189,7 @@ void FakeOS_simStep(FakeOS* os){
   
   //CICLA QUA DENTRO-- non più I guess -- ora dovrei avert risolto con os->ready.first che mi faceva ciclare
   
+  //per il controllo della list is full devo fare controlli particolari pe rgli scheduler diversi altrimenti cicla forse un while diverso a seconda dello scheduler
   while(os->schedule_fn && (List_isFull(&os->running)==0) && os->ready.first){    
     (*os->schedule_fn)(os, os->schedule_args); 
   }

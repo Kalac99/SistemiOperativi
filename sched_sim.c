@@ -12,6 +12,7 @@ typedef struct {
 } SchedRRArgs;
 
 void schedRR(FakeOS* os, void* args_){
+  if (List_isFull(&os->running)==1) return;
   SchedRRArgs* args=(SchedRRArgs*)args_;
   
   // look for the first process in ready
@@ -45,6 +46,59 @@ void schedRR(FakeOS* os, void* args_){
   }
 };
 
+void schedSRJF(FakeOS* os, void* args_){
+  SchedRRArgs* args=(SchedRRArgs*)args_;
+  
+  // look for the first process in ready
+  // if none, return
+  if (!os->ready.first)
+    return;
+
+  FakePCB* pcb;
+  //FakePCB* pcb=(FakePCB*) List_popFront(&os->ready);
+
+  ListItem* aux = os->ready.first;
+  int min = 100;
+  FakePCB* minpcb;
+  int  concurrent;
+
+  while(aux){
+    pcb = (FakePCB*) aux;
+    ProcessEvent* evento = (ProcessEvent*) pcb->events.first;
+    concurrent = evento->duration;
+    if(concurrent<min) {
+      min = concurrent;
+      minpcb = pcb;
+    }
+    aux = aux->next;
+  }
+
+  pcb = (FakePCB*) List_detach(&os->ready,(ListItem*) minpcb);
+
+  //Se c'è spazio nei core inserisco in running il pcb appena preso dai ready
+  if (List_isFull(&os->running)==0){
+    List_pushBack(&os->running,(ListItem*)pcb);  
+  }
+  else return;
+  
+  assert(pcb->events.first);
+  ProcessEvent* e = (ProcessEvent*)pcb->events.first;
+  assert(e->type==CPU);
+
+  // look at the first event
+  // if duration>quantum
+  // push front in the list of event a CPU event of duration quantum
+  // alter the duration of the old event subtracting quantum
+  if (e->duration>args->quantum) {
+    ProcessEvent* qe=(ProcessEvent*)malloc(sizeof(ProcessEvent));
+    qe->list.prev=qe->list.next=0;
+    qe->type=CPU;
+    qe->duration=args->quantum;
+    e->duration-=args->quantum;
+    List_pushFront(&pcb->events, (ListItem*)qe);
+  }
+};
+
 int main(int argc, char** argv) {
 
   //Prendo il numero di parametri...
@@ -54,6 +108,11 @@ int main(int argc, char** argv) {
     scanf("%d",&nuclei);
     if(nuclei==0) printf("Sul serio? Che ci fai con una CPU inutile?\n");
   }
+
+  while(scheduler<1 || scheduler >2){
+    printf("Inserisci il tipo di scheduler voluto: 1->RR 2->SRJF");
+    scanf("%d",&scheduler);
+  }
   
 
   FakeOS_init(&os);
@@ -62,6 +121,9 @@ int main(int argc, char** argv) {
   os.schedule_args=&srr_args;
   os.schedule_fn=schedRR;
 
+  
+  //os.schedule_fn=schedSRJF;
+  
   for (int i=1; i<argc; ++i){
     FakeProcess new_process;
     int num_events=FakeProcess_load(&new_process, argv[i]);

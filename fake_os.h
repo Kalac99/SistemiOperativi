@@ -4,6 +4,8 @@
 
 int nuclei;
 
+int scheduler;
+
 typedef struct {
   ListItem list;
   int pid;

@@ -43,7 +43,7 @@ void schedRR(FakeOS* os, void* args_){
     }
     pcb = (FakePCB*) List_detach(&os->ready,(ListItem*) minpcb);
   }
-
+  // Se scheduler==3 allora l'utente ha scelto una politica di scheduling basata su priorità, verrà estratto dalla ready il processo con maggior priorità (valore numerico minore)
   else if(scheduler == 3){
     ListItem* aux = os->ready.first;
     int min = 100;
@@ -53,13 +53,15 @@ void schedRR(FakeOS* os, void* args_){
     while(aux){
       pcb = (FakePCB*) aux;
       concurrent = pcb->prio;
-      if(concurrent<min) {
+      if (pcb->temp_prio>1) pcb->temp_prio--;
+      if(concurrent<=min) {
         min = concurrent;
         minpcb = pcb;
       }
       aux = aux->next; 
     }
     pcb = (FakePCB*) List_detach(&os->ready,(ListItem*) minpcb);
+    pcb->temp_prio++;
   }
   
   //Se c'è spazio nei core inserisco in running il pcb appena preso dai ready
@@ -91,13 +93,13 @@ int main(int argc, char** argv) {
   //Prendo il numero di parametri...
 
   
-
+  //QUANTI CORE VUOLE L'UTENTE?
   while(nuclei<1){
     printf("Inserisci il numero di core voluti, minimo 1: ");
     scanf("%d",&nuclei);
     if(nuclei==0) printf("Sul serio? Che ci fai con una CPU inutile?\n");
   }
-
+  //CHE TIPO DI SCHEDULING VUOLE L'UTENTE?
   while(scheduler<1 || scheduler >3){
     printf("Inserisci il tipo di scheduler voluto 1->RR 2->SRJF 3->PRIO: ");
     scanf("%d",&scheduler);
@@ -105,7 +107,7 @@ int main(int argc, char** argv) {
 
   FakeOS_init(&os);
   SchedRRArgs srr_args;
-  if(scheduler >= 2) srr_args.quantum=1;
+  if(scheduler == 3) srr_args.quantum=1;
   else srr_args.quantum=5;
   os.schedule_args=&srr_args;
   os.schedule_fn=schedRR; 
@@ -122,9 +124,7 @@ int main(int argc, char** argv) {
     }
   }
   printf("num processes in queue %d\n", os.processes.size);
-  // qua forse sarà os.running.first, oppure un os.running1 .. os.runningN
-  // OCCHIO qua c'era os.running
-  //Nella mia prima versione è os.running.first
+  //Tramite os.running.first viene controllato che almeno un processo sia in esecuzione sulla cpu
   while(os.running.first
         || os.ready.first
         || os.waiting.first

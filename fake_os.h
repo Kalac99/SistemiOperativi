@@ -11,6 +11,7 @@ typedef struct {
   int pid;
   ListHead events;
   int prio;
+  int temp_prio; // campo necessario per implementare l'aging;
 } FakePCB;
 
 struct FakeOS;

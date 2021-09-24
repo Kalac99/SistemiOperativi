@@ -29,6 +29,7 @@ int FakeProcess_load(FakeProcess* p, const char* filename) {
       p->pid=pid;
       p->arrival_time=arrival_time;
       p->prio = prio;
+      p->temp_prio = prio;
       //assegnare da qui la priorità!! oppure creare un caso a parte?
       goto next_round;
     }

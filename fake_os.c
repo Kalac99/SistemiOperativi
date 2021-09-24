@@ -49,6 +49,7 @@ void FakeOS_createProcess(FakeOS* os, FakeProcess* p) {
   new_pcb->list.next=new_pcb->list.prev=0;
   new_pcb->pid=p->pid;
   new_pcb->prio = p->prio;
+  new_pcb->temp_prio = p->temp_prio;
   new_pcb->events=p->events;
 
   assert(new_pcb->events.first && "process without events");
@@ -122,6 +123,7 @@ void FakeOS_simStep(FakeOS* os){
         switch (e->type){
         case CPU:
           printf("\t\tmove to ready\n");
+          pcb->temp_prio = pcb->prio; //QUANDO TERMINA IL CPU BURST LA PRIORITÀ DEL PROCESSO VIENE RESETTATA A QUELLA INIZIALE
           List_pushBack(&os->ready, (ListItem*) pcb);
           break;
         case IO:
@@ -131,6 +133,7 @@ void FakeOS_simStep(FakeOS* os){
         }
       }
     }
+    
   }
 
   
@@ -179,9 +182,30 @@ void FakeOS_simStep(FakeOS* os){
           }
         }
       }
-      
-      
+      else{
+        ListItem* ausilio = os->ready.first;
+        ProcessEvent* e = (ProcessEvent*) running->events.first;
+        int min = e->duration;
+        int  concurrent;
+        FakePCB* pcb;
+        while(ausilio){
+          pcb = (FakePCB*) ausilio;
+          ProcessEvent* evento = (ProcessEvent*) pcb->events.first;
+          concurrent = evento->duration;
+          if(concurrent<min) {
+            //PREEMPTION!!
+            printf("\t\tprocess with shorter duration was found\n");
+            printf("\t\tpreempting, move to ready\n");
+            List_detach(&os->running, (ListItem*)running);
+            List_pushBack(&os->ready, (ListItem*)running);
+            break;
+          }
+          else ausilio = ausilio->next; 
+        }
+      }
     }
+
+    
   }
 
   // call schedule, if defined

@@ -43,6 +43,24 @@ void schedRR(FakeOS* os, void* args_){
     }
     pcb = (FakePCB*) List_detach(&os->ready,(ListItem*) minpcb);
   }
+
+  else if(scheduler == 3){
+    ListItem* aux = os->ready.first;
+    int min = 100;
+    FakePCB* minpcb;
+    int  concurrent;
+
+    while(aux){
+      pcb = (FakePCB*) aux;
+      concurrent = pcb->prio;
+      if(concurrent<min) {
+        min = concurrent;
+        minpcb = pcb;
+      }
+      aux = aux->next; 
+    }
+    pcb = (FakePCB*) List_detach(&os->ready,(ListItem*) minpcb);
+  }
   
   //Se c'è spazio nei core inserisco in running il pcb appena preso dai ready
   if (List_isFull(&os->running)==0){
@@ -80,14 +98,14 @@ int main(int argc, char** argv) {
     if(nuclei==0) printf("Sul serio? Che ci fai con una CPU inutile?\n");
   }
 
-  while(scheduler<1 || scheduler >2){
-    printf("Inserisci il tipo di scheduler voluto 1->RR 2->SRJF: ");
+  while(scheduler<1 || scheduler >3){
+    printf("Inserisci il tipo di scheduler voluto 1->RR 2->SRJF 3->PRIO: ");
     scanf("%d",&scheduler);
   }
 
   FakeOS_init(&os);
   SchedRRArgs srr_args;
-  if(scheduler == 2) srr_args.quantum=1;
+  if(scheduler >= 2) srr_args.quantum=1;
   else srr_args.quantum=5;
   os.schedule_args=&srr_args;
   os.schedule_fn=schedRR; 

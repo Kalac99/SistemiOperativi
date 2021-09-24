@@ -16,6 +16,7 @@ typedef struct {
   int pid; // assigned by us
   int arrival_time;
   ListHead events;
+  int prio;
 } FakeProcess;
 
 int FakeProcess_load(FakeProcess* p, const char* filename);

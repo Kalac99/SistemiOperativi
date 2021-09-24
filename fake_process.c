@@ -13,6 +13,7 @@ int FakeProcess_load(FakeProcess* p, const char* filename) {
   size_t line_length=0;
   p->pid=-1;
   p->arrival_time=-1;
+  p->prio=-1;
   List_init(&p->events);
   p->list.prev=p->list.next=0;
   int num_events=0;
@@ -22,11 +23,13 @@ int FakeProcess_load(FakeProcess* p, const char* filename) {
     int arrival_time=-1;
     int num_tokens=0;
     int duration=-1;
-
-    num_tokens=sscanf(buffer, "PROCESS %d %d", &pid, &arrival_time);
-    if (num_tokens==2 && p->pid<0){
+    int prio = -1;
+    num_tokens=sscanf(buffer, "PROCESS %d %d %d", &pid, &arrival_time, &prio);
+    if (num_tokens==3 && p->pid<0){
       p->pid=pid;
       p->arrival_time=arrival_time;
+      p->prio = prio;
+      //assegnare da qui la priorità!! oppure creare un caso a parte?
       goto next_round;
     }
     num_tokens=sscanf(buffer, "CPU_BURST %d", &duration);

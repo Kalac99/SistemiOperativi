@@ -48,6 +48,7 @@ void FakeOS_createProcess(FakeOS* os, FakeProcess* p) {
   FakePCB* new_pcb=(FakePCB*) malloc(sizeof(FakePCB));
   new_pcb->list.next=new_pcb->list.prev=0;
   new_pcb->pid=p->pid;
+  new_pcb->prio = p->prio;
   new_pcb->events=p->events;
 
   assert(new_pcb->events.first && "process without events");

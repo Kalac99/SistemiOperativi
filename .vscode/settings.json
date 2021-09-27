@@ -3,6 +3,7 @@
         "stdio.h": "c",
         "assert.h": "c",
         "linked_list.h": "c",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "fake_process.h": "c"
     }
 }

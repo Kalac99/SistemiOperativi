@@ -160,6 +160,7 @@ void FakeOS_simStep(FakeOS* os){
       e->duration--;
       printf("\t\tremaining time:%d\n",e->duration);
       if (e->duration==0){
+        running->counter = 0;
         printf("\t\tend burst\n");
         List_popFront(&running->events);
         free(e);
@@ -173,7 +174,7 @@ void FakeOS_simStep(FakeOS* os){
           case CPU:
             printf("\t\tmove to ready\n");
             List_pushBack(&os->ready, (ListItem*)running);
-            
+            running->temp_prio = running->prio;
             break;
           case IO:
             printf("\t\tmove to waiting\n");
@@ -182,7 +183,7 @@ void FakeOS_simStep(FakeOS* os){
           }
         }
       }
-      else{
+      else if(scheduler==2){
         ListItem* ausilio = os->ready.first;
         ProcessEvent* e = (ProcessEvent*) running->events.first;
         int min = e->duration;
@@ -195,6 +196,26 @@ void FakeOS_simStep(FakeOS* os){
           if(concurrent<min) {
             //PREEMPTION!!
             printf("\t\tprocess with shorter duration was found\n");
+            printf("\t\tpreempting, move to ready\n");
+            List_detach(&os->running, (ListItem*)running);
+            List_pushBack(&os->ready, (ListItem*)running);
+            break;
+          }
+          else ausilio = ausilio->next; 
+        }
+      }
+
+      else if(scheduler==3){
+        ListItem* ausilio = os->ready.first;
+        int min = running->temp_prio;
+        FakePCB* pcb;
+        int  concurrent;
+        while(ausilio){
+          pcb = (FakePCB*) ausilio;
+          concurrent = pcb->temp_prio;
+          if(concurrent<min) {
+            //PREEMPTION!!
+            printf("\t\tprocess with higher priority was found\n");
             printf("\t\tpreempting, move to ready\n");
             List_detach(&os->running, (ListItem*)running);
             List_pushBack(&os->ready, (ListItem*)running);

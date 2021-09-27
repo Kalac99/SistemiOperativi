@@ -49,11 +49,18 @@ void schedRR(FakeOS* os, void* args_){
     int min = 100;
     FakePCB* minpcb;
     int  concurrent;
-
     while(aux){
       pcb = (FakePCB*) aux;
-      concurrent = pcb->prio;
-      if (pcb->temp_prio>1) pcb->temp_prio--;
+      concurrent = pcb->temp_prio;
+      //printf("\nPID: %d CONCORRENTE(TEMP): %d E CONTATORE: %d\n",pcb->pid,concurrent,pcb->counter);
+      if (pcb->counter==(quanto-1)*nuclei) {
+        if(pcb->temp_prio>1) {
+          pcb->temp_prio--;
+          printf("\t\tprocess %d waited for %d time slots, his priority is now increased\n",pcb->pid,quanto);
+          pcb->counter=0;
+        }
+      }
+      else pcb->counter++;
       if(concurrent<=min) {
         min = concurrent;
         minpcb = pcb;
@@ -61,7 +68,6 @@ void schedRR(FakeOS* os, void* args_){
       aux = aux->next; 
     }
     pcb = (FakePCB*) List_detach(&os->ready,(ListItem*) minpcb);
-    pcb->temp_prio++;
   }
   
   //Se c'è spazio nei core inserisco in running il pcb appena preso dai ready
@@ -105,10 +111,11 @@ int main(int argc, char** argv) {
     scanf("%d",&scheduler);
   }
 
+  quanto = 5;
+
   FakeOS_init(&os);
   SchedRRArgs srr_args;
-  if(scheduler == 3) srr_args.quantum=1;
-  else srr_args.quantum=5;
+  srr_args.quantum=quanto;
   os.schedule_args=&srr_args;
   os.schedule_fn=schedRR; 
   

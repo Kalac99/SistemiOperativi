@@ -18,6 +18,7 @@ typedef struct {
   ListHead events;
   int prio;
   int temp_prio;
+  int counter;
 } FakeProcess;
 
 int FakeProcess_load(FakeProcess* p, const char* filename);

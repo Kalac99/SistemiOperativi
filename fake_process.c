@@ -4,6 +4,7 @@
 
 #define LINE_LENGTH 1024
 
+
 int FakeProcess_load(FakeProcess* p, const char* filename) {
   FILE* f=fopen(filename, "r");
   if (! f)
@@ -25,11 +26,19 @@ int FakeProcess_load(FakeProcess* p, const char* filename) {
     int duration=-1;
     int prio = -1;
     num_tokens=sscanf(buffer, "PROCESS %d %d %d", &pid, &arrival_time, &prio);
-    if (num_tokens==3 && p->pid<0){
+    if (num_tokens==2 && p->pid<0){
+      p->pid=pid;
+      p->arrival_time=arrival_time;
+      
+      //assegnare da qui la priorità!! oppure creare un caso a parte?
+      goto next_round;
+    }
+    else if (num_tokens==3 && p->pid<0){
       p->pid=pid;
       p->arrival_time=arrival_time;
       p->prio = prio;
       p->temp_prio = prio;
+      p->counter = 0;
       //assegnare da qui la priorità!! oppure creare un caso a parte?
       goto next_round;
     }

@@ -6,12 +6,15 @@ int nuclei;
 
 int scheduler;
 
+int quanto;
+
 typedef struct {
   ListItem list;
   int pid;
   ListHead events;
   int prio;
   int temp_prio; // campo necessario per implementare l'aging;
+  int counter; // la priorità verrà aumentata (quindi numericamente decrementato il campio temp_prio di 1) ogni volta che il counter arriva al valore di quanto
 } FakePCB;
 
 struct FakeOS;

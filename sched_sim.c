@@ -128,7 +128,15 @@ int main(int argc, char** argv) {
   printf("\nPer l'esecuzione del programma è necessario far partire l'eseguibile passando come argomenti i seguenti: \n-Numero di core voluti(minimo 1) \n-Numero rappresentante la politica di scheduling: \n\t1->Round Robin\n\t2->Shortest Remaining Job First\n\t3->Priority Based(Assicurarsi di passare processi compatibili)\n-Processi da dare in pasto al programma\n");
   printf("----------------------------------------------\n");
   nuclei = atoi(argv[1]);
+  if(nuclei<1){
+    printf("\nSono stati richiesti meno di 1 core, questo è impossibile, ritenta...\n\n");
+    return 0;
+  }
   scheduler = atoi(argv[2]);
+  if(scheduler<1 || scheduler >3){
+    printf("\nNessuno scheduler è stato scelto, le opzioni dispondibili sono 1, 2, 3 guarda sopra...\n\n");
+    return 0;
+  }
 
   FakeOS_init(&os);
   SchedArgs sched_args;

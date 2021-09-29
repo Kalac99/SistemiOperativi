@@ -38,7 +38,7 @@ int FakeProcess_load(FakeProcess* p, const char* filename) {
       p->arrival_time=arrival_time;
       p->prio = prio;
       p->temp_prio = prio;
-      p->counter = 0;
+      p->counter = 1;
       //assegnare da qui la priorità!! oppure creare un caso a parte?
       goto next_round;
     }

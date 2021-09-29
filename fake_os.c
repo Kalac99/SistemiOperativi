@@ -20,7 +20,7 @@ void FakeOS_createProcess(FakeOS* os, FakeProcess* p) {
   assert(p->arrival_time==os->timer && "time mismatch in creation");
   // we check that in the list of PCBs there is no
   // pcb having the same pid
-  // se implemento la linked list mi conviene fare l'aux per vedere i pcb di ogni core
+  //controllo che il pid non sia lo stesso di uno dei processi in esecuzione
   ListItem* aux;
   aux=os->running.first;
   while(aux){
@@ -56,7 +56,7 @@ void FakeOS_createProcess(FakeOS* os, FakeProcess* p) {
 
   // depending on the type of the first event
   // we put the process either in ready or in waiting
-  //dovrebbe rimanere invariata nel multicore
+  
   ProcessEvent* e=(ProcessEvent*)new_pcb->events.first;
   switch(e->type){
   case CPU:
@@ -122,8 +122,7 @@ void FakeOS_simStep(FakeOS* os){
         e=(ProcessEvent*) pcb->events.first;
         switch (e->type){
         case CPU:
-          printf("\t\tmove to ready\n");
-          pcb->temp_prio = pcb->prio; //QUANDO TERMINA IL CPU BURST LA PRIORITÀ DEL PROCESSO VIENE RESETTATA A QUELLA INIZIALE
+          printf("\t\tmove to ready\n"); 
           List_pushBack(&os->ready, (ListItem*) pcb);
           break;
         case IO:
@@ -143,8 +142,6 @@ void FakeOS_simStep(FakeOS* os){
   // and reschedule process
   // if last event, destroy running
 
-  //qua probabilmente aux=os->running.first e poi il while, altrimenti un blocco tipo il seguente per ogni core
-  
   
   aux=os->running.first;
   
@@ -160,7 +157,7 @@ void FakeOS_simStep(FakeOS* os){
       e->duration--;
       printf("\t\tremaining time:%d\n",e->duration);
       if (e->duration==0){
-        running->counter = 0;
+        running->counter = 1; //anche il contatore viene resettato a 1 ogni volta che un processo riesce a completare un burst
         printf("\t\tend burst\n");
         List_popFront(&running->events);
         free(e);
@@ -174,7 +171,7 @@ void FakeOS_simStep(FakeOS* os){
           case CPU:
             printf("\t\tmove to ready\n");
             List_pushBack(&os->ready, (ListItem*)running);
-            running->temp_prio = running->prio;
+            running->temp_prio = running->prio; //QUANDO TERMINA IL CPU BURST LA PRIORITÀ DEL PROCESSO VIENE RESETTATA A QUELLA INIZIALE
             break;
           case IO:
             printf("\t\tmove to waiting\n");
@@ -183,6 +180,7 @@ void FakeOS_simStep(FakeOS* os){
           }
         }
       }
+      //controllo se nella ready ci sono processi con durata minore, in tal caso preemption
       else if(scheduler==2){
         ListItem* ausilio = os->ready.first;
         ProcessEvent* e = (ProcessEvent*) running->events.first;
@@ -204,7 +202,7 @@ void FakeOS_simStep(FakeOS* os){
           else ausilio = ausilio->next; 
         }
       }
-
+      //controllo se nella ready ci sono processi con priorità maggiore, in tal caso preemption
       else if(scheduler==3){
         ListItem* ausilio = os->ready.first;
         int min = running->temp_prio;
@@ -231,11 +229,6 @@ void FakeOS_simStep(FakeOS* os){
 
   // call schedule, if defined
   // Controllo che ci sia almeno un core libero verificando che la lista dei running sia piena, se piena allora tutti i core sono occupati -> SKIP
-  //if (os->schedule_fn && ! List_isFull(os->running))
-  
-  //CICLA QUA DENTRO-- non più I guess -- ora dovrei avert risolto con os->ready.first che mi faceva ciclare
-  
-  //per il controllo della list is full devo fare controlli particolari pe rgli scheduler diversi altrimenti cicla forse un while diverso a seconda dello scheduler
   while(os->schedule_fn && (List_isFull(&os->running)==0) && os->ready.first){    
     (*os->schedule_fn)(os, os->schedule_args); 
   }
@@ -252,7 +245,6 @@ void FakeOS_simStep(FakeOS* os){
   ++os->timer;
 }
 
-//non implementata?
-/*void FakeOS_destroy(FakeOS* os) {
+
+void FakeOS_destroy(FakeOS* os) {
 }
-*/

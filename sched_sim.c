@@ -54,14 +54,15 @@ void sched(FakeOS* os, void* args_){
     while(aux){
       pcb = (FakePCB*) aux;
       concurrent = pcb->temp_prio;
-      //printf("\nPID: %d CONCORRENTE(TEMP): %d E CONTATORE: %d\n",pcb->pid,concurrent,pcb->counter);
-      //La priorità dei processi in attesa viene aumentata ogni 4 burst (20 unità di tempo) finchè non raggiunge massima priorità o gli viene affidata la cpu,
+      
+      //La priorità dei processi in attesa viene aumentata all'incirca ogni 4 burst (20 unità di tempo) finchè non raggiunge massima priorità o gli viene affidata la cpu,
       //terminato il burst ogni processo torna ad avere la priorità assegnatagli all'inizio -> tutto per evitare starving dei processi a bassa priorità
       //ogni volta che la priortà viene aumentata l'utente viene avvisato con un messaggio e il contatore viene azzerato
-      if (pcb->counter==(quanto-1)*nuclei) {
+      //printf("\naoooo MA NUCLEI =: %d\n",nuclei);
+      if (pcb->counter==20*nuclei) {
         if(pcb->temp_prio>1) {
           pcb->temp_prio--;
-          printf("\t\tprocess %d waited for %d time slots, his priority is now increased\n",pcb->pid,quanto);
+          printf("\t\tprocess %d waited for %d time slots, his priority is now increased\n",pcb->pid,quanto-1);
           pcb->counter=1;
         }
       }

@@ -148,6 +148,7 @@ void FakeOS_simStep(FakeOS* os){
   int  i =  1;
   while(aux){
     FakePCB* running = (FakePCB*) aux;
+    int num;
     aux=aux->next;
     printf("\trunning pid on core %d: %d\n",i,running?running->pid:-1);
     i++;
@@ -207,23 +208,34 @@ void FakeOS_simStep(FakeOS* os){
         ListItem* ausilio = os->ready.first;
         int min = running->temp_prio;
         FakePCB* pcb;
+        num = 0;
         int  concurrent;
         while(ausilio){
           pcb = (FakePCB*) ausilio;
           concurrent = pcb->temp_prio;
-          if(concurrent<min) {
-            //PREEMPTION!!
-            printf("\t\tprocess with higher priority was found\n");
-            printf("\t\tpreempting, move to ready\n");
-            List_detach(&os->running, (ListItem*)running);
-            List_pushBack(&os->ready, (ListItem*)running);
-            break;
+          if (pcb->counter==20*nuclei) {
+            if(pcb->temp_prio>1) {
+              pcb->temp_prio--;
+              printf("\t\tprocess %d waited for %d time slots, his priority is now increased\n",pcb->pid,quanto-1);
+              pcb->counter=1;
+            }
           }
-          else ausilio = ausilio->next; 
+          else pcb->counter++;
+          if(concurrent<min) {
+            num+=1;
+          }
+          ausilio = ausilio->next; 
+        }
+        //printf("\n numero processi con maggior prio: %d\n",num);
+        if (num>0){
+          //PREEMPTION!!
+          printf("\t\t%d processes with higher priority were found\n",num);
+          printf("\t\tpreempting, move to ready\n");
+          List_detach(&os->running, (ListItem*)running);
+          List_pushBack(&os->ready, (ListItem*)running);
         }
       }
     }
-
     
   }
 

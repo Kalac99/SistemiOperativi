@@ -97,4 +97,11 @@ int List_isFull(ListHead* head){
   else return 1;
 }
 
+void List_delete(ListHead* head){
+  while(head->first){
+    List_popFront(head);
+  }
+  return;
+}
+
 

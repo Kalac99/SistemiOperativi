@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "fake_process.h"
+#include "fake_os.h"
 
 #define LINE_LENGTH 1024
 
@@ -27,19 +28,23 @@ int FakeProcess_load(FakeProcess* p, const char* filename) {
     int prio = -1;
     num_tokens=sscanf(buffer, "PROCESS %d %d %d", &pid, &arrival_time, &prio);
     if (num_tokens==2 && p->pid<0){
+      if (scheduler == 3){ //Se lo scheduling è priority ma al processo manca una priorità allora viene assegnata quella massima notificando l'utente a inizio esecuzione
+        printf("\n\nATTENZIONE! Campo priorità assente -> PROCESS %d %d ? \n\nLa politica di scheduling scelta(Priority Based Scheduling) non è compatibile con i processi dati in pasto,verrà assegnata una priorità massima, modificare adeguatamente i processi(aggiungendo il campo priorità) o cambiare politica!\n\n",pid,arrival_time);
+        p->prio = 1;
+        p->temp_prio = 1;
+        p->counter = 0;
+      }
       p->pid=pid;
       p->arrival_time=arrival_time;
-      
-      //assegnare da qui la priorità!! oppure creare un caso a parte?
       goto next_round;
     }
     else if (num_tokens==3 && p->pid<0){
       p->pid=pid;
       p->arrival_time=arrival_time;
-      p->prio = prio;
+      p->prio = prio; // viene presa la priorità dal file di testo passato
+      //di scheduling o aggiungerre il campo priorità ai processi 
       p->temp_prio = prio;
       p->counter = 1;
-      //assegnare da qui la priorità!! oppure creare un caso a parte?
       goto next_round;
     }
     num_tokens=sscanf(buffer, "CPU_BURST %d", &duration);

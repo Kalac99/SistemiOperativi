@@ -6,8 +6,8 @@
 
 
 void FakeOS_init(FakeOS* os) {
-  List_init(&os->running);
-  os->running.maxsize = nuclei; //SETTO IL NUMERO DI CORE <- tramite variabile globale che prendo da scanf
+  List_init(&os->running); //inizializzata la lista che conterra i pcb dei processi in esecuzione
+  os->running.maxsize = nuclei; //SETTO IL NUMERO DI CORE dalla variabile globale con valore scelto dall'utente prima dell'esecuzione del programma
   List_init(&os->ready);
   List_init(&os->waiting);
   List_init(&os->processes);
@@ -142,7 +142,7 @@ void FakeOS_simStep(FakeOS* os){
   // and reschedule process
   // if last event, destroy running
 
-  
+  //comincia il controllo per stampare cosa stanno facendo i processi in esecuzione, se sono stati trovati processi con maggior priorità a seconda della politica scelta etc..
   aux=os->running.first;
   
   int  i =  1;
@@ -158,7 +158,7 @@ void FakeOS_simStep(FakeOS* os){
       e->duration--;
       printf("\t\tremaining time:%d\n",e->duration);
       if (e->duration==0){
-        running->counter = 1; //anche il contatore viene resettato a 1 ogni volta che un processo riesce a completare un burst
+        running->counter = 0; //il contatore viene azzerato ogni volta che un processo riesce a completare un burst
         printf("\t\tend burst\n");
         List_popFront(&running->events);
         free(e);
@@ -182,7 +182,7 @@ void FakeOS_simStep(FakeOS* os){
         }
       }
       //controllo se nella ready ci sono processi con durata minore, in tal caso preemption
-      else if(scheduler==2){
+      else if(scheduler==2){  //questo controllo avviene solo se l'utente ha scelta una politica di scheduling SRJF
         ListItem* ausilio = os->ready.first;
         ProcessEvent* e = (ProcessEvent*) running->events.first;
         int min = e->duration;
@@ -195,7 +195,7 @@ void FakeOS_simStep(FakeOS* os){
           if(concurrent<min) {
             //PREEMPTION!!
             printf("\t\tprocess with shorter duration was found\n");
-            printf("\t\tpreempting, move to ready\n");
+            printf("\t\tpreempting... move to ready\n");
             List_detach(&os->running, (ListItem*)running);
             List_pushBack(&os->ready, (ListItem*)running);
             break;
@@ -204,7 +204,7 @@ void FakeOS_simStep(FakeOS* os){
         }
       }
       //controllo se nella ready ci sono processi con priorità maggiore, in tal caso preemption
-      else if(scheduler==3){
+      else if(scheduler==3){  //questo controllo avviene solo se l'utente ha scelta una politica di scheduling basata su priorità
         ListItem* ausilio = os->ready.first;
         int min = running->temp_prio;
         FakePCB* pcb;
@@ -217,7 +217,7 @@ void FakeOS_simStep(FakeOS* os){
             if(pcb->temp_prio>1) {
               pcb->temp_prio--;
               printf("\t\tprocess %d waited for %d time slots, his priority is now increased\n",pcb->pid,quanto-1);
-              pcb->counter=1;
+              pcb->counter=0;
             }
           }
           else pcb->counter++;
@@ -226,11 +226,10 @@ void FakeOS_simStep(FakeOS* os){
           }
           ausilio = ausilio->next; 
         }
-        //printf("\n numero processi con maggior prio: %d\n",num);
         if (num>0){
           //PREEMPTION!!
-          printf("\t\t%d processes with higher priority were found\n",num);
-          printf("\t\tpreempting, move to ready\n");
+          printf("\t\t%d processes with higher priority were found\n",num); //sono inlusi anche processi che eventualmente hanno terminato il burst sono stati spostati sulla ready
+          printf("\t\tpreempting... move to ready\n");
           List_detach(&os->running, (ListItem*)running);
           List_pushBack(&os->ready, (ListItem*)running);
         }
@@ -258,5 +257,10 @@ void FakeOS_simStep(FakeOS* os){
 }
 
 
-void FakeOS_destroy(FakeOS* os) {
-}
+/*void FakeOS_destroy(FakeOS* os) {
+  List_delete(&os->ready);
+  List_delete(&os->running);
+  List_delete(&os->waiting);
+  List_delete(&os->processes);
+  return;
+}*/

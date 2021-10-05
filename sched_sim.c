@@ -66,7 +66,7 @@ void sched(FakeOS* os, void* args_){
           if(pcb->temp_prio>1) {
             pcb->temp_prio--;
             printf("\t\tprocess %d waited for %d time slots, his priority is now increased\n",pcb->pid,quanto-1);
-            pcb->counter=1;
+            pcb->counter=0;
           }
         }
         else pcb->counter++;
@@ -156,4 +156,5 @@ int main(int argc, char** argv) {
     FakeOS_simStep(&os);
   }
   printf(" ALL PROCESSES ENDED THEIR WORK ..... BYE BYE\n");
+  //FakeOS_destroy(&os);
 }

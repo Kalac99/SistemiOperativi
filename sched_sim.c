@@ -70,7 +70,7 @@ void sched(FakeOS* os, void* args_){
           }
         }
         else pcb->counter++;
-        if(concurrent<=min) {
+        if(concurrent<min) {
           min = concurrent;
           minpcb = pcb;
         }

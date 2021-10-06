@@ -158,7 +158,7 @@ void FakeOS_simStep(FakeOS* os){
       e->duration--;
       printf("\t\tremaining time:%d\n",e->duration);
       if (e->duration==0){
-        running->counter = 0; //il contatore viene azzerato ogni volta che un processo riesce a completare un burst
+        running->counter = 0; //il contatore viene azzerato ogni volta che un processo riesce a completare un quanto
         printf("\t\tend burst\n");
         List_popFront(&running->events);
         free(e);
@@ -172,11 +172,12 @@ void FakeOS_simStep(FakeOS* os){
           case CPU:
             printf("\t\tmove to ready\n");
             List_pushBack(&os->ready, (ListItem*)running);
-            running->temp_prio = running->prio; //QUANDO TERMINA IL CPU BURST LA PRIORITÀ DEL PROCESSO VIENE RESETTATA A QUELLA INIZIALE
+            running->temp_prio = running->prio; //QUANDO TERMINA IL QUANTO LA PRIORITÀ DEL PROCESSO VIENE RESETTATA A QUELLA INIZIALE
             break;
           case IO:
             printf("\t\tmove to waiting\n");
             List_pushBack(&os->waiting, (ListItem*) running);
+            running->temp_prio = running->prio; //QUANDO TERMINA IL CPU BURST LA PRIORITÀ DEL PROCESSO VIENE RESETTATA A QUELLA INIZIALE
             break;
           }
         }
